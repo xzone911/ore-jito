@@ -165,12 +165,12 @@ struct TreasuryArgs {}
 
 #[derive(Parser, Debug)]
 struct ClaimArgs {
-    #[arg(
-        // long,
-        value_name = "AMOUNT",
-        help = "The amount of rewards to claim. Defaults to max."
-    )]
-    amount: Option<f64>,
+    // #[arg(
+    //     // long,
+    //     value_name = "AMOUNT",
+    //     help = "The amount of rewards to claim. Defaults to max."
+    // )]
+    // amount: Option<f64>,
 
     #[arg(
         // long,
@@ -237,7 +237,7 @@ async fn main() {
             miner.mine(args.threads).await;
         }
         Commands::Claim(args) => {
-            miner.claim(cluster, args.beneficiary, args.amount).await;
+            miner.claim(cluster, args.beneficiary).await;
         }
         #[cfg(feature = "admin")]
         Commands::Initialize(_) => {
