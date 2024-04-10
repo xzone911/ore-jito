@@ -11,7 +11,7 @@ use solana_sdk::{
 use crate::{utils::proof_pubkey, Miner};
 
 impl Miner {
-    pub async fn claim(&self, cluster: String, beneficiary: Option<String>, amount: Option<f64>) {
+    pub async fn claim(&self, cluster: String, beneficiary: Option<String>) {
         let signer = self.signer();
         let pubkey = signer.pubkey();
         let client = RpcClient::new_with_commitment(cluster, CommitmentConfig::confirmed());
@@ -21,20 +21,18 @@ impl Miner {
             }
             None => self.initialize_ata().await,
         };
-        let amount = if let Some(amount) = amount {
-            (amount * 10f64.powf(ore::TOKEN_DECIMALS as f64)) as u64
-        } else {
+        let mut amount = 0;
             match client.get_account(&proof_pubkey(pubkey)).await {
                 Ok(proof_account) => {
                     let proof = Proof::try_from_bytes(&proof_account.data).unwrap();
                     proof.claimable_rewards
+                    amount=proof.claimable_rewards
                 }
                 Err(err) => {
                     println!("Error looking up claimable rewards: {:?}", err);
                     return;
                 }
             }
-        };
         let amountf = (amount as f64) / (10f64.powf(ore::TOKEN_DECIMALS as f64));
         let ix = ore::instruction::claim(pubkey, beneficiary, amount);
         println!("Submitting claim transaction...");
